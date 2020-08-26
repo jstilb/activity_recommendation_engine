@@ -1,13 +1,13 @@
 import pandas as pd
 import gspread
+from info import *
 
-gc = gspread.oauth()
+gc = gspread.service_account(filename=fname)
 
-sh = gc.open("Activity Recommendation Engine")
+sh = gc.open(spsh)
+ws = sh.worksheet("Activities")
+data = ws.get_all_values()
+headers = data.pop(0)
 
-print(sh.sheet1.get('A1'))
-
-#test data frame
-d = {'col1': [1, 2], 'col2': [3, 4]}
-df = pd.DataFrame(data=d)
+df = pd.DataFrame(data, columns=headers)
 print(df)
