@@ -1,6 +1,7 @@
 import pandas as pd
 import gspread
 from info import *
+import random
 
 #google sheets connection & DataFrame creation
 gc = gspread.service_account(filename=fname)
@@ -44,8 +45,19 @@ def check_log(log):
 
 #create recommendation using check_log return, priority, and rand. Update actvities and activity log
 def recommendation_engine(cl_return, act):
-    print(cl_return)
-    print(act)
+    dif_options = ["easy", "med", "hard"]
+    priority_options = ["low", "med", "high"]
+    temp_df = pd.DataFrame(act[act["Planning Difficulty"].str.match(dif_options[cl_return - 1])])
+    df = pd.DataFrame()
+    counter = 1
+    while df.empty:
+        df = temp_df[temp_df["Priority"].str.match(priority_options[-counter])]
+        counter += 1
+    print(df)
+
+
+
+
 
 
 
