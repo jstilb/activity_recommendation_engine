@@ -2,6 +2,10 @@ import pandas as pd
 import gspread
 from info import *
 import random
+from twilio.rest import Client
+
+#Twilio Information
+client = Client(account_sid, auth_token)
 
 #google sheets connection & DataFrame creation
 gc = gspread.service_account(filename=fname)
@@ -51,11 +55,20 @@ def recommendation_engine(cl_return, act):
     df = pd.DataFrame()
     counter = 1
     while df.empty:
-        df = temp_df[temp_df["Priority"].str.match(priority_options[-counter])]
+        df = temp_df[temp_df["Priority"].str.match(priority_options[-counter])].reset_index(drop=True)
         counter += 1
-    print(df)
+    recommendation = df.loc[random.randrange(len(df.index))]
+    #message = client.messages \
+        #.create(
+        #body=recommendation.to_string(),
+        #from_=twilio_phone,
+        #to=jm_phone
+    #)
+    #message.sid
+    # not working: row_to_delete = act_ws.find(recommendation.extract())
 
 
+    print(row_to_delete)
 
 
 
