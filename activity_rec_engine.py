@@ -12,14 +12,10 @@ gc = gspread.service_account(filename=fname)
 sh = gc.open(spsh)
 
 act_ws = sh.worksheet("Activities")
-act_data = act_ws.get_all_values()
-act_headers = act_data.pop(0)
-act_df = pd.DataFrame(act_data, columns=act_headers)
+act_df = pd.DataFrame(act_ws.get_all_records())
 
 log_ws = sh.worksheet("Recommendation Log")
-log_data = log_ws.get_all_values()
-log_headers = log_data.pop(0)
-log_df = pd.DataFrame(log_data, columns=log_headers)
+log_df = pd.DataFrame(log_ws.get_all_records())
 
 #need to include only activities that are able to be completed or planned during current season
 
@@ -65,10 +61,15 @@ def recommendation_engine(cl_return, act):
         #to=jm_phone
     #)
     #message.sid
-    # not working: row_to_delete = act_ws.find(recommendation.extract())
+    #act_ws.find()
+    activity_gs_row_to_delete = act_ws.find(recommendation.get(0)).row
+    #.drop("Planning/Scheduled/Completed", axis=1)
+
+    #updated_log_ws_values = log_df.append(recommendation).reset_index(drop=True).values.tolist()
+    #log_ws.update(updated_log_ws_values)
+    print(activity_gs_row_to_delete)
 
 
-    print(row_to_delete)
 
 
 
