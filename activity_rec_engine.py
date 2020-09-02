@@ -19,7 +19,7 @@ log_df = pd.DataFrame(log_ws.get_all_records())
 
 #need to include only activities that are able to be completed or planned during current season
 
-#check Activity Log for recent item
+#check Activity Log for recent item to create parameter for recommendaiton engine
 def check_log(log):
     recent_activities = log.tail(10)
     count_easy_act = 0
@@ -45,6 +45,7 @@ def check_log(log):
 
 #create recommendation using check_log return, priority, and rand. Update actvities and activity log
 def recommendation_engine(cl_return, act):
+    #set parameters for recommendation using priority & planning difficulty
     dif_options = ["easy", "med", "hard"]
     priority_options = ["low", "med", "high"]
     temp_df = pd.DataFrame(act[act["Planning Difficulty"].str.match(dif_options[cl_return - 1])])
@@ -53,21 +54,25 @@ def recommendation_engine(cl_return, act):
     while df.empty:
         df = temp_df[temp_df["Priority"].str.match(priority_options[-counter])].reset_index(drop=True)
         counter += 1
-    recommendation = df.loc[random.randrange(len(df.index))]
-    #message = client.messages \
-        #.create(
-        #body=recommendation.to_string(),
-        #from_=twilio_phone,
-        #to=jm_phone
-    #)
-    #message.sid
-    #act_ws.find()
-    activity_gs_row_to_delete = act_ws.find(recommendation.get(0)).row
-    #.drop("Planning/Scheduled/Completed", axis=1)
 
-    #updated_log_ws_values = log_df.append(recommendation).reset_index(drop=True).values.tolist()
-    #log_ws.update(updated_log_ws_values)
-    print(activity_gs_row_to_delete)
+    #make recommendation
+    recommendation = df.loc[random.randrange(len(df.index))]
+    message = client.messages \
+        .create(
+        body=recommendation.to_string(),
+        from_=twilio_phone,
+        to=jm_phone
+    )
+    #message.sid
+
+    #update recommendation log
+    new_log_df = log_df.append(recommendation).reset_index(drop=True).fillna('')
+    log_ws.update([new_log_df.columns.values.tolist()] + new_log_df.values.tolist())
+
+    #delete row in activities worksheet
+    row_to_delete = act_ws.find(recommendation.get(0)).row
+    act_ws.delete_rows(row_to_delete)
+
 
 
 
